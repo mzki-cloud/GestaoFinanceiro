@@ -1,66 +1,64 @@
-// middleware.js
-// Importe createServerClient em vez de createMiddlewareClient
-import { createServerClient } from '@supabase/auth-helpers-nextjs';
-import { NextResponse } from 'next/server';
+    // middleware.js
+    // Importe createServerClient em vez de createMiddlewareClient
+    import { createServerClient } from '@supabase/auth-helpers-nextjs';
+    import { NextResponse } from 'next/server';
 
-export default async function middleware(req) {
-  const res = NextResponse.next();
-  // Use createServerClient aqui
-  const supabase = createServerClient(
-    process.env.NEXT_PUBLIC_SUPABASE_URL,
-    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
-    { req, res }
-  );
+    // Use 'export default' para a função middleware, conforme a recomendação do Next.js
+    export default async function middleware(req) {
+      const res = NextResponse.next();
+      // Use createServerClient aqui, passando as variáveis de ambiente
+      const supabase = createServerClient(
+        process.env.NEXT_PUBLIC_SUPABASE_URL,
+        process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY,
+        { req, res }
+      );
 
-  const {
-    data: { session },
-  } = await supabase.auth.getSession();
+      // Atualiza a sessão do Supabase
+      // Isso é crucial para que o auth-helpers funcione corretamente
+      await supabase.auth.getSession();
 
-  // Rotas protegidas: se não há sessão e tenta acessar uma rota protegida, redireciona para /login
-  const protectedRoutes = [
-    '/dashboard',
-    '/months',
-    '/transactions',
-    '/cards',
-    '/settings',
-  ];
+      // --- Lógica de Redirecionamento ---
 
-  const isProtectedRoute = protectedRoutes.some(route => req.nextUrl.pathname.startsWith(route));
+      // Rotas que exigem autenticação
+      const protectedRoutes = [
+        '/dashboard',
+        '/months',
+        '/transactions',
+        '/cards',
+        '/settings',
+      ];
 
-  if (!session && isProtectedRoute) {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
+      const isProtectedRoute = protectedRoutes.some(route => req.nextUrl.pathname.startsWith(route));
 
-  // Rotas de autenticação: se há sessão e tenta acessar /login ou /signup, redireciona para /dashboard
-  const authRoutes = ['/login', '/signup'];
-  const isAuthRoute = authRoutes.some(route => req.nextUrl.pathname.startsWith(route));
+      // Se o usuário NÃO está logado E tenta acessar uma rota protegida OU a rota raiz '/'
+      if (!res.locals.session && (isProtectedRoute || req.nextUrl.pathname === '/')) {
+        // Redireciona para a página de login
+        return NextResponse.redirect(new URL('/login', req.url));
+      }
 
-  if (session && isAuthRoute) {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
+      // Rotas de autenticação (login, signup)
+      const authRoutes = ['/login', '/signup'];
+      const isAuthRoute = authRoutes.some(route => req.nextUrl.pathname.startsWith(route));
 
-  // Se o usuário acessar a rota raiz '/' e não estiver logado, redireciona para /login
-  if (!session && req.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/login', req.url));
-  }
+      // Se o usuário ESTÁ logado E tenta acessar uma rota de autenticação OU a rota raiz '/'
+      if (res.locals.session && (isAuthRoute || req.nextUrl.pathname === '/')) {
+        // Redireciona para o dashboard
+        return NextResponse.redirect(new URL('/dashboard', req.url));
+      }
 
-  // Se o usuário acessar a rota raiz '/' e estiver logado, redireciona para /dashboard
-  if (session && req.nextUrl.pathname === '/') {
-    return NextResponse.redirect(new URL('/dashboard', req.url));
-  }
+      return res;
+    }
 
-  return res;
-}
-
-export const config = {
-  matcher: [
-    '/', // Rota raiz
-    '/dashboard/:path*',
-    '/months/:path*',
-    '/transactions/:path*',
-    '/cards/:path*',
-    '/settings/:path*',
-    '/login',
-    '/signup',
-  ],
-};
+    // Define quais rotas o middleware deve ser executado
+    export const config = {
+      matcher: [
+        '/', // Rota raiz
+        '/dashboard/:path*',
+        '/months/:path*',
+        '/transactions/:path*',
+        '/cards/:path*',
+        '/settings/:path*',
+        '/login',
+        '/signup',
+      ],
+    };

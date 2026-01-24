@@ -1,9 +1,9 @@
-    /* src/app/globals.css */
-    @import "tailwindcss/preflight"; /* Substitui @tailwind base */
-    @tailwind utilities; /* Mantém @tailwind utilities */
+        /* src/app/globals.css */
+        @import "tailwindcss/preflight"; /* Substitui @tailwind base */
+        @tailwind utilities; /* Mantém @tailwind utilities */
 
-    /* Seus estilos globais personalizados */
-    body {
-      font-family: 'Inter', sans-serif; /* Exemplo de fonte */
-      @apply bg-gray-50 text-gray-900; /* Cores de fundo e texto padrão */
-    }
+        /* Seus estilos globais personalizados */
+        body {
+          font-family: 'Inter', sans-serif; /* Exemplo de fonte */
+          @apply bg-gray-50 text-gray-900; /* Cores de fundo e texto padrão */
+        }
