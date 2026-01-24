@@ -1,8 +1,9 @@
-    /* src/app/globals.css */
-    @import "tailwindcss/preflight";
-    @tailwind utilities;
+        /* src/app/globals.css */
+        @import "tailwindcss/preflight"; /* Substitui @tailwind base */
+        @tailwind utilities; /* Mantém @tailwind utilities */
 
-    body {
-      font-family: 'Inter', sans-serif; /* Ou a fonte de sua preferência */
-      @apply bg-gray-50 text-gray-900;
-    }
+        /* Seus estilos globais personalizados */
+        body {
+          font-family: 'Inter', sans-serif; /* Exemplo de fonte */
+          @apply bg-gray-50 text-gray-900; /* Cores de fundo e texto padrão */
+        }
